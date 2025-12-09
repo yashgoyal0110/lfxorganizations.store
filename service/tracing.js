@@ -1,5 +1,3 @@
-console.log('🔥 tracing.js LOADED');
-
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
@@ -7,7 +5,6 @@ const { resourceFromAttributes } = require('@opentelemetry/resources');
 const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
 require('dotenv').config();
 
-// Use SigNoz Cloud ingestion endpoint
 const traceExporter = new OTLPTraceExporter({
   url: `https://ingest.${process.env.SIGNOZ_REGION}.signoz.cloud:443/v1/traces`,
   headers: {
@@ -17,20 +14,21 @@ const traceExporter = new OTLPTraceExporter({
 
 const sdk = new NodeSDK({
   traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()],
+  instrumentations: [getNodeAutoInstrumentations()],   //enables Express & HTTP tracing automatically
   resource: resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: 'express-api', // will show as service name in SigNoz
+    [ATTR_SERVICE_NAME]: 'express-api',
   }),
 });
-// start the SDK in this process
+
 (async () => {
   try {
-    sdk.start(); // works even if start() is sync; await just passes through
-    console.log('✅ OpenTelemetry initialized for Express API');
+    sdk.start();
+    console.log('OpenTelemetry initialized for Express API');
   } catch (err) {
-    console.error('❌ Error starting OpenTelemetry SDK', err);
+    console.error('Error starting OpenTelemetry SDK', err);
   }
 })();
+
 
 process.on('SIGTERM', async () => {
   try {

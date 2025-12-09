@@ -1,4 +1,3 @@
-// src/instrumentation.ts
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -21,7 +20,7 @@ const exporter = new OTLPTraceExporter({
 
 const provider = new WebTracerProvider({
   resource: resourceFromAttributes({
-    'service.name': 'react-frontend', // how it shows up in SigNoz
+    'service.name': 'react-frontend',
   }),
   spanProcessors: [new BatchSpanProcessor(exporter)],
 });
@@ -33,8 +32,6 @@ provider.register({
 registerInstrumentations({
   instrumentations: [
     new FetchInstrumentation({
-      // This makes browser → backend traces link together
-      // start with everything, tighten later
       propagateTraceHeaderCorsUrls: /.*/, 
     }),
     new UserInteractionInstrumentation({
